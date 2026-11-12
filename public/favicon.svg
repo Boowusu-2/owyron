@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 444 216" fill="none">
+  <defs>
+    <clipPath id="owyron-ring-cut">
+      <polygon points="0,0 232,0 218,94 124,216 0,216" />
+    </clipPath>
+    <mask id="owyron-ring-mask">
+      <rect width="444" height="216" fill="black" />
+      <circle cx="106" cy="107" r="101" fill="white" clip-path="url(#owyron-ring-cut)" />
+      <circle cx="108" cy="107" r="64.5" fill="black" />
+    </mask>
+  </defs>
+  <rect width="444" height="216" fill="#060608" rx="36" />
+  <g transform="translate(18, 12) scale(0.92)">
+    <rect width="444" height="216" fill="#FFFFFF" mask="url(#owyron-ring-mask)" />
+    <path
+      d="M148 208 L242 82 Q250 72 263 72 L273 72 Q286 72 294 82 L390 208 L341 208 L272 117 Q268 112 264 117 L195 208 Z"
+      fill="#FFFFFF"
+    />
+    <path
+      d="M370 8 L434 8 Q438 8 436 12 L386 85 Q384 89 379 89 L319 89 Q315 89 317 85 L365 12 Q367 8 370 8 Z"
+      fill="#3815FC"
+    />
+  </g>
+</svg>

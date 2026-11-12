@@ -1,0 +1,111 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Space Grotesk", "Inter", system-ui, -apple-system, sans-serif;
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+
+  --color-obsidian: #060608;
+  --color-graphite: #0c0d12;
+  --color-slate-surface: #12141c;
+  --color-ivory: #f8f9fb;
+  --color-indigo-brand: #3815fc;
+  --color-indigo-signal: #5843ff;
+  --color-indigo-muted: #4b39d6;
+}
+
+:root {
+  color-scheme: dark;
+  --bg-primary: #060608;
+  --bg-secondary: #0c0d12;
+  --bg-light: #f8f9fb;
+  --border-dark: rgba(255, 255, 255, 0.09);
+  --border-light: rgba(6, 6, 8, 0.1);
+}
+
+html {
+  scroll-behavior: smooth;
+  background-color: #060608;
+  color: #f5f6fa;
+  font-family: var(--font-sans);
+}
+
+body {
+  margin: 0;
+  overflow-x: hidden;
+  background-color: #060608;
+  color: #f5f6fa;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.font-display {
+  font-family: var(--font-display);
+}
+
+.font-mono-tech {
+  font-family: var(--font-mono);
+}
+
+/* Precision architectural grid pattern */
+.bg-architectural-grid {
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: 72px 72px;
+}
+
+.bg-architectural-grid-light {
+  background-image:
+    linear-gradient(to right, rgba(6, 6, 8, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(6, 6, 8, 0.04) 1px, transparent 1px);
+  background-size: 72px 72px;
+}
+
+/* Restrained fade-up reveal */
+@keyframes fadeRise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-rise {
+  animation: fadeRise 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-fade-rise-delay-1 {
+  animation: fadeRise 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both;
+}
+
+.animate-fade-rise-delay-2 {
+  animation: fadeRise 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both;
+}
+
+.animate-fade-rise-delay-3 {
+  animation: fadeRise 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.3s both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .animate-fade-rise,
+  .animate-fade-rise-delay-1,
+  .animate-fade-rise-delay-2,
+  .animate-fade-rise-delay-3 {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+/* Subtle focus ring for keyboard navigation */
+:focus-visible {
+  outline: 2px solid #5843ff;
+  outline-offset: 2px;
+}
