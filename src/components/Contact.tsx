@@ -1,5 +1,6 @@
-import { ArrowRight, Check, Copy } from 'lucide-react';
+import { ArrowRight, Check, Copy, Mail } from 'lucide-react';
 import { type FormEvent, useState } from 'react';
+import { ENV } from '../config/env';
 import { ENQUIRY_CHANNELS, type EnquiryChannel } from '../data/siteContent';
 import { Reveal } from './Reveal';
 
@@ -17,6 +18,8 @@ interface FormErrors {
   message?: string;
 }
 
+type SubmissionMode = 'idle' | 'submitting' | 'sent-api' | 'sent-mailto' | 'staged';
+
 export function Contact() {
   const [form, setForm] = useState<FormState>({
     channelId: 'general',
@@ -26,7 +29,8 @@ export function Contact() {
     message: '',
   });
   const [errors, setErrors] = useState<FormErrors>({});
-  const [submitted, setSubmitted] = useState(false);
+  const [submitError, setSubmitError] = useState<string>('');
+  const [mode, setMode] = useState<SubmissionMode>('idle');
   const [copied, setCopied] = useState(false);
 
   const activeChannel =
@@ -49,7 +53,25 @@ export function Contact() {
     return nextErrors;
   };
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const buildMailtoHref = () => {
+    const subject = encodeURIComponent(
+      `[OWYRON] ${activeChannel.title} — ${form.name.trim()}`,
+    );
+    const bodyLines = [
+      `Enquiry Type: ${activeChannel.title}`,
+      `Name: ${form.name.trim()}`,
+      `Email: ${form.email.trim()}`,
+      form.organization.trim() ? `Organization: ${form.organization.trim()}` : null,
+      '',
+      form.message.trim(),
+    ]
+      .filter((line): line is string => line !== null)
+      .join('\n');
+
+    return `mailto:${activeChannel.email}?subject=${subject}&body=${encodeURIComponent(bodyLines)}`;
+  };
+
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const validationErrors = validate();
     if (Object.keys(validationErrors).length > 0) {
@@ -57,13 +79,55 @@ export function Contact() {
       return;
     }
     setErrors({});
-    setSubmitted(true);
+    setSubmitError('');
+
+    if (ENV.contactFormEndpoint) {
+      setMode('submitting');
+      try {
+        const res = await fetch(ENV.contactFormEndpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+          },
+          body: JSON.stringify({
+            channel: activeChannel.title,
+            targetEmail: activeChannel.email || undefined,
+            name: form.name.trim(),
+            email: form.email.trim(),
+            organization: form.organization.trim() || undefined,
+            message: form.message.trim(),
+          }),
+        });
+
+        if (!res.ok) {
+          throw new Error(`Submission failed (${res.status})`);
+        }
+        setMode('sent-api');
+      } catch {
+        setMode('idle');
+        setSubmitError(
+          activeChannel.email
+            ? `Unable to reach the form service right now. You can email us directly at ${activeChannel.email}.`
+            : 'Unable to reach the form service right now. Please try again shortly.',
+        );
+      }
+      return;
+    }
+
+    if (activeChannel.email) {
+      window.location.assign(buildMailtoHref());
+      setMode('sent-mailto');
+      return;
+    }
+
+    setMode('staged');
   };
 
   const handleCopyPayload = async () => {
     const summary = [
       `OWYRON Enquiry — ${activeChannel.title}`,
-      `Target Placeholder: ${activeChannel.emailPlaceholder}`,
+      activeChannel.email ? `Recipient: ${activeChannel.email}` : null,
       `Name: ${form.name.trim()}`,
       `Email: ${form.email.trim()}`,
       form.organization.trim() ? `Organization: ${form.organization.trim()}` : null,
@@ -82,7 +146,8 @@ export function Contact() {
   };
 
   const handleReset = () => {
-    setSubmitted(false);
+    setMode('idle');
+    setSubmitError('');
     setCopied(false);
     setForm((prev) => ({
       ...prev,
@@ -92,6 +157,8 @@ export function Contact() {
       message: '',
     }));
   };
+
+  const isCompleted = mode === 'sent-api' || mode === 'sent-mailto' || mode === 'staged';
 
   return (
     <section
@@ -123,18 +190,21 @@ export function Contact() {
                 ambitious technical collaborations.
               </p>
 
-              {/* Primary email placeholder block */}
-              <div className="mt-10 border border-white/12 bg-[#0C0D12] p-5">
-                <span className="font-mono-tech block text-[11px] tracking-[0.18em] text-[#666D80] uppercase">
-                  Primary Contact Channel (Placeholder)
-                </span>
-                <p className="font-mono-tech mt-2 text-sm text-white">
-                  [contact-email-placeholder]
-                </p>
-                <p className="mt-1.5 text-xs text-[#9CA3B4]">
-                  Replace with OWYRON&apos;s official domain address prior to production launch.
-                </p>
-              </div>
+              {/* Direct email channel when configured via environment */}
+              {ENV.contactEmail && (
+                <div className="mt-10 border border-white/12 bg-[#0C0D12] p-5">
+                  <span className="font-mono-tech block text-[11px] tracking-[0.18em] text-[#666D80] uppercase">
+                    Direct Contact
+                  </span>
+                  <a
+                    href={`mailto:${ENV.contactEmail}`}
+                    className="font-mono-tech mt-2 inline-flex items-center gap-2 text-sm text-white transition-colors hover:text-[#5843FF]"
+                  >
+                    <Mail className="h-4 w-4 text-[#5843FF]" />
+                    <span>{ENV.contactEmail}</span>
+                  </a>
+                </div>
+              )}
 
               {/* Selectable enquiry channels */}
               <div className="mt-8 divide-y divide-white/10 border-y border-white/10">
@@ -146,7 +216,7 @@ export function Contact() {
                       type="button"
                       onClick={() => {
                         setForm((prev) => ({ ...prev, channelId: channel.id }));
-                        if (submitted) setSubmitted(false);
+                        if (isCompleted) setMode('idle');
                       }}
                       className={`group flex w-full items-start justify-between gap-4 py-5 text-left transition-colors ${
                         isActive ? 'text-white' : 'text-[#9CA3B4] hover:text-white'
@@ -167,9 +237,11 @@ export function Contact() {
                         <p className="mt-1.5 pl-4 text-xs leading-relaxed text-[#9CA3B4]">
                           {channel.description}
                         </p>
-                        <p className="font-mono-tech mt-1.5 pl-4 text-[11px] text-[#666D80]">
-                          {channel.emailPlaceholder}
-                        </p>
+                        {channel.email && (
+                          <p className="font-mono-tech mt-1.5 pl-4 text-[11px] text-[#666D80]">
+                            {channel.email}
+                          </p>
+                        )}
                       </div>
                       <span
                         className={`font-mono-tech shrink-0 text-[11px] uppercase ${
@@ -201,18 +273,24 @@ export function Contact() {
                   </span>
                 </div>
 
-                {submitted ? (
+                {isCompleted ? (
                   <div className="py-10" role="status" aria-live="polite">
                     <div className="inline-flex h-10 w-10 items-center justify-center border border-[#5843FF] bg-[#3815FC]/20 text-white">
                       <Check className="h-5 w-5" />
                     </div>
                     <h4 className="font-display mt-6 text-2xl font-semibold text-white">
-                      Enquiry Prepared
+                      {mode === 'sent-api'
+                        ? 'Enquiry Sent'
+                        : mode === 'sent-mailto'
+                          ? 'Mail Client Opened'
+                          : 'Enquiry Ready'}
                     </h4>
                     <p className="mt-3 max-w-lg text-sm leading-relaxed text-[#9CA3B4]">
-                      Your <span className="text-white">{activeChannel.label.toLowerCase()}</span>{' '}
-                      brief has been formatted and validated. Connect this form handler to
-                      OWYRON&apos;s production mail or API endpoint to transmit enquiries directly.
+                      {mode === 'sent-api'
+                        ? `Your ${activeChannel.label.toLowerCase()} message has been delivered to OWYRON.`
+                        : mode === 'sent-mailto'
+                          ? `Your email client should open with a pre-filled draft addressed to ${activeChannel.email}. You can also copy the formatted summary below.`
+                          : `Your ${activeChannel.label.toLowerCase()} brief is formatted and ready to copy below.`}
                     </p>
 
                     <div className="mt-6 border border-white/10 bg-[#060608] p-5 font-mono-tech text-xs leading-relaxed text-[#B4BAC8]">
@@ -263,7 +341,6 @@ export function Contact() {
                   </div>
                 ) : (
                   <form onSubmit={handleSubmit} noValidate className="mt-8 space-y-6">
-                    {/* Enquiry type selector pills */}
                     <div>
                       <span className="font-mono-tech mb-2.5 block text-[11px] tracking-[0.18em] text-[#9CA3B4] uppercase">
                         Enquiry Type
@@ -416,16 +493,32 @@ export function Contact() {
                       )}
                     </div>
 
+                    {submitError && (
+                      <p role="alert" className="border border-[#F87171]/30 bg-[#F87171]/10 px-4 py-3 text-xs text-[#FCA5A5]">
+                        {submitError}
+                      </p>
+                    )}
+
                     <div className="flex flex-col items-start justify-between gap-4 border-t border-white/10 pt-6 sm:flex-row sm:items-center">
                       <p className="text-xs text-[#666D80]">
-                        Destination: <span className="font-mono-tech">{activeChannel.emailPlaceholder}</span>
+                        {activeChannel.email ? (
+                          <>
+                            Routing to{' '}
+                            <span className="font-mono-tech text-[#9CA3B4]">
+                              {activeChannel.email}
+                            </span>
+                          </>
+                        ) : (
+                          <span>{activeChannel.title}</span>
+                        )}
                       </p>
 
                       <button
                         type="submit"
-                        className="group inline-flex items-center gap-3 bg-white px-6 py-3.5 text-sm font-medium tracking-wide text-[#060608] transition-all duration-200 hover:bg-[#3815FC] hover:text-white"
+                        disabled={mode === 'submitting'}
+                        className="group inline-flex items-center gap-3 bg-white px-6 py-3.5 text-sm font-medium tracking-wide text-[#060608] transition-all duration-200 hover:bg-[#3815FC] hover:text-white disabled:opacity-60"
                       >
-                        <span>Submit Enquiry</span>
+                        <span>{mode === 'submitting' ? 'Sending...' : 'Submit Enquiry'}</span>
                         <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
                       </button>
                     </div>
@@ -439,4 +532,3 @@ export function Contact() {
     </section>
   );
 }
-

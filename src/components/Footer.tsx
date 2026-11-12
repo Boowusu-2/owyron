@@ -4,7 +4,6 @@ import { OwyronLogo } from './OwyronLogo';
 const CURRENT_YEAR = new Date().getFullYear();
 
 export function Footer() {
-
   return (
     <footer className="border-t border-white/10 bg-[#060608] text-[#9CA3B4]">
       <div className="mx-auto max-w-7xl px-6 py-16 sm:px-8 lg:px-12 lg:py-20">
@@ -58,18 +57,30 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Contact information placeholders */}
+          {/* Contact channels */}
           <div className="lg:col-span-3">
             <h3 className="font-mono-tech text-[11px] tracking-[0.2em] text-white uppercase">
-              Contact Placeholders
+              Contact
             </h3>
             <ul className="mt-4 space-y-3 text-xs">
               {ENQUIRY_CHANNELS.map((channel) => (
                 <li key={channel.id}>
                   <span className="block text-[#D1D5DF]">{channel.title}</span>
-                  <span className="font-mono-tech mt-0.5 block text-[#666D80]">
-                    {channel.emailPlaceholder}
-                  </span>
+                  {channel.email ? (
+                    <a
+                      href={`mailto:${channel.email}`}
+                      className="font-mono-tech mt-0.5 block text-[#9CA3B4] transition-colors hover:text-white"
+                    >
+                      {channel.email}
+                    </a>
+                  ) : (
+                    <a
+                      href="#contact"
+                      className="font-mono-tech mt-0.5 block text-[#666D80] transition-colors hover:text-white"
+                    >
+                      Enquiry form &rarr;
+                    </a>
+                  )}
                 </li>
               ))}
             </ul>

@@ -10,6 +10,18 @@ Official web application for **OWYRON** — an independent technology company fo
 - **Icons:** Lucide React
 - **Linting:** oxlint
 
+## Environment Configuration
+
+Copy [.env.example](./.env.example) to `.env` (already created locally and gitignored) and configure the values you want active:
+
+- `VITE_CONTACT_EMAIL` — Primary / General enquiries email address
+- `VITE_PARTNERSHIP_EMAIL` — Partnership enquiries email address (defaults to `VITE_CONTACT_EMAIL` if unset)
+- `VITE_COLLABORATION_EMAIL` — Project collaboration enquiries email address (defaults to `VITE_CONTACT_EMAIL` if unset)
+- `VITE_CONTACT_FORM_ENDPOINT` — Optional HTTP POST endpoint (e.g., Formspree, Web3Forms, or a custom API) for direct form delivery
+- `VITE_SITE_URL` — Canonical site URL (optional)
+
+Add the same variables under **Vercel → Project Settings → Environment Variables**.
+
 ## Local Development
 
 ```bash
@@ -28,7 +40,3 @@ npm run preview
 ## Vercel Deployment
 
 The repository includes [vercel.json](./vercel.json) configured for Vite (`npm run build`, output directory `dist`, SPA rewrites, and security headers).
-
-1. Push this repository to `https://github.com/Boowusu-2/owyron.git`.
-2. Import the repository in **Vercel** — framework preset **Vite** and output directory `dist` will be picked up automatically.
-3. Update the placeholder contact identifiers in `src/data/siteContent.ts` before going live.

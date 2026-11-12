@@ -1,3 +1,5 @@
+import { ENV } from '../config/env';
+
 export interface NavItem {
   id: string;
   label: string;
@@ -43,7 +45,7 @@ export interface EnquiryChannel {
   label: string;
   title: string;
   description: string;
-  emailPlaceholder: string;
+  email: string;
 }
 
 export const NAV_ITEMS: NavItem[] = [
@@ -203,7 +205,7 @@ export const ENQUIRY_CHANNELS: EnquiryChannel[] = [
     title: 'General Enquiries',
     description:
       'Questions regarding OWYRON, our technological focus areas, or ongoing exploratory directions.',
-    emailPlaceholder: '[general-contact-email-placeholder]',
+    email: ENV.contactEmail,
   },
   {
     id: 'partnership',
@@ -211,7 +213,7 @@ export const ENQUIRY_CHANNELS: EnquiryChannel[] = [
     title: 'Partnership Enquiries',
     description:
       'Strategic alignment with research institutions, technology organizations, and aligned innovators.',
-    emailPlaceholder: '[partnerships-email-placeholder]',
+    email: ENV.partnershipEmail,
   },
   {
     id: 'collaboration',
@@ -219,7 +221,7 @@ export const ENQUIRY_CHANNELS: EnquiryChannel[] = [
     title: 'Project Collaboration Enquiries',
     description:
       'Technical collaboration on ambitious engineering initiatives, prototypes, and applied R&D.',
-    emailPlaceholder: '[collaboration-email-placeholder]',
+    email: ENV.collaborationEmail,
   },
 ];
 
