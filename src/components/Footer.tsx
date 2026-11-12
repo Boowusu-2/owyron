@@ -10,8 +10,14 @@ export function Footer() {
         <div className="grid grid-cols-1 gap-12 lg:grid-cols-12">
           {/* Brand column */}
           <div className="lg:col-span-4">
-            <a href="#home" aria-label="OWYRON Home" className="inline-flex items-center">
+            <a href="#home" aria-label="OWYRON Home" className="inline-flex items-start gap-1">
               <OwyronLogo variant="horizontal" theme="dark" size="md" />
+              <span
+                className="font-sans text-[11px] leading-none font-medium text-[#9CA3B4]"
+                aria-hidden="true"
+              >
+                &reg;
+              </span>
             </a>
             <p className="mt-5 max-w-sm text-sm leading-relaxed text-[#9CA3B4]">
               OWYRON is an independent technology company focused on artificial intelligence,
@@ -88,9 +94,12 @@ export function Footer() {
         </div>
 
         {/* Bottom bar */}
-        <div className="mt-16 flex flex-col items-start justify-between gap-4 border-t border-white/10 pt-8 text-xs text-[#666D80] sm:flex-row sm:items-center">
-          <p>&copy; {CURRENT_YEAR} OWYRON. All rights reserved.</p>
-          <p className="font-mono-tech tracking-wider uppercase">
+        <div className="mt-16 flex flex-col items-start justify-between gap-4 border-t border-white/10 pt-8 text-xs text-[#9CA3B4] sm:flex-row sm:items-center">
+          <p>
+            &copy; {CURRENT_YEAR} OWYRON<sup className="ml-0.5 text-[10px]">&reg;</sup>. All rights
+            reserved.
+          </p>
+          <p className="font-mono-tech tracking-wider text-[#666D80] uppercase">
             Engineering Intelligence &middot; Building Tomorrow
           </p>
         </div>
